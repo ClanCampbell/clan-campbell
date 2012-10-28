@@ -1,0 +1,32 @@
+<project name="Disassemble class files" default="main">
+
+	<target name="main">
+		<disasm classpath="bin" output="javap-new.txt" />
+		<disasm classpath="../recovered/lib" output="javap-old.txt" />
+	</target>
+
+	<macrodef name="disasm">
+		<attribute name="classpath" />
+		<attribute name="output" />
+		<sequential>
+			<exec executable="javap" output="@{output}">
+				<arg value="-c" />
+				<arg value="-classpath" />
+				<arg value="@{classpath}" />
+				<arg value="-private" />
+				<arg value="avi.copy.Main" />
+				<arg value="avi.copy.Main$$1" />
+				<arg value="avi.copy.Main$$2" />
+				<arg value="avi.copy.Main$$3" />
+				<arg value="avi.copy.Main$$4" />
+				<arg value="avi.copy.Main$$5" />
+				<arg value="avi.copy.Main$$6" />
+				<arg value="avi.copy.Main$$7" />
+				<arg value="avi.copy.Main$$8" />
+				<arg value="avi.copy.Main$$Copier" />
+				<arg value="avi.copy.Main$$WorkItem" />
+			</exec>
+		</sequential>
+	</macrodef>
+
+</project>
