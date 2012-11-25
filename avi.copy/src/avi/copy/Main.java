@@ -242,11 +242,10 @@ public class Main {
 
 	private static final DateFormat DATE = new SimpleDateFormat("yyyyMMddHHmm");
 
-	private static final Pattern Extensions = Pattern.compile(
-			".*\\.(avi|mkv|mov|mp4|mpg)", Pattern.CASE_INSENSITIVE);
+	private static final Pattern Extensions = Pattern.compile(".*\\.(avi|mkv|mov|mp4|mpg)", Pattern.CASE_INSENSITIVE);
 
 	public static void main(String[] args) {
-		new Main().run();
+		new Main().run(args);
 	}
 
 	private static Button newButton(Composite parent, String text) {
@@ -278,12 +277,11 @@ public class Main {
 		return bar;
 	}
 
-	private static Text newText(Composite parent, String text) {
+	private static Text newText(Composite parent) {
 		Text field;
 
 		field = new Text(parent, 18432);
 		field.setLayoutData(new GridData(SWT.FILL, SWT.UP, true, false));
-		field.setText(text);
 
 		return field;
 	}
@@ -460,15 +458,15 @@ public class Main {
 			};
 
 			newLabel(group, "Source:");
-			sourceFolder = newText(group, "D:/video");
+			sourceFolder = newText(group);
 			sourceFolder.addModifyListener(settingsListener);
 
 			newLabel(group, "Control file:");
-			controlFile = newText(group, "D:/video/Meghan.xml");
+			controlFile = newText(group);
 			controlFile.addModifyListener(settingsListener);
 
 			newLabel(group, "Destination:");
-			destinationFolder = newText(group, "E:/video");
+			destinationFolder = newText(group);
 			destinationFolder.addModifyListener(settingsListener);
 		}
 
@@ -550,8 +548,7 @@ public class Main {
 			group.setLayoutData(new GridData(SWT.FILL, SWT.UP, true, false));
 
 			statusLabel = new Label(group, SWT.LEAD);
-			statusLabel.setLayoutData(new GridData(SWT.FILL, SWT.UP, true,
-					false));
+			statusLabel.setLayoutData(new GridData(SWT.FILL, SWT.UP, true, false));
 		}
 	}
 
@@ -636,12 +633,17 @@ public class Main {
 		}
 	}
 
-	private void run() {
+	private void run(String[] args) {
 		Display display = new Display();
 
 		shell = new Shell(display);
 
 		createControls(shell);
+
+		controlFile.setText(args.length > 0 ? args[0] : "D:/video/Meghan.xml");
+		destinationFolder.setText(args.length > 1 ? args[1] : "E:/video");
+		sourceFolder.setText(args.length > 2 ? args[2] : "D:/video");
+
 		updateStatus();
 
 		shell.addDisposeListener(new DisposeListener() {
@@ -838,8 +840,7 @@ public class Main {
 					dirty = false;
 					updateStatus();
 				} catch (IOException e) {
-					statusLabel.setText("Can't save control file: "
-							+ e.getLocalizedMessage());
+					statusLabel.setText("Can't save control file: " + e.getLocalizedMessage());
 				}
 			}
 
