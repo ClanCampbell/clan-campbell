@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="export_jar">
+
+	<target name="export_jar">
+		<jar destfile="Yahoo.jar" filesetmanifest="mergewithoutmain" filesonly="true">
+			<manifest>
+				<attribute name="Main-Class" value="quotes.Main"/>
+				<attribute name="Class-Path" value="."/>
+			</manifest>
+			<fileset dir="bin"/>
+		</jar>
+	</target>
+
+</project>
