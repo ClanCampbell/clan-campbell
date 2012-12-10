@@ -74,7 +74,7 @@ public class Main {
 
 		private final File source;
 
-		private int state;
+		private volatile int state;
 
 		private String trouble;
 
@@ -104,9 +104,8 @@ public class Main {
 		public synchronized void pause() {
 			if (state != S_ABORTED) {
 				state = S_PAUSED;
+				notifyAll();
 			}
-
-			notifyAll();
 		}
 
 		@Override
@@ -164,6 +163,13 @@ public class Main {
 				trouble = e.getLocalizedMessage();
 			} finally {
 				safeClose(in);
+				if (out != null && state == S_ABORTED) {
+					try {
+						out.setLength(0);
+					} catch (IOException e) {
+						// ignore - we're about to delete the file
+					}
+				}
 				safeClose(out);
 				bytesCopied = length;
 
@@ -183,9 +189,8 @@ public class Main {
 		public synchronized void unpause() {
 			if (state == S_PAUSED) {
 				state = S_COPYING;
+				notifyAll();
 			}
-
-			notifyAll();
 		}
 
 		private synchronized int waitUnpaused() {
@@ -286,7 +291,7 @@ public class Main {
 		return field;
 	}
 
-	static void safeClose(Closeable stream) {
+	/*private*/static void safeClose(Closeable stream) {
 		if (stream != null) {
 			try {
 				stream.close();
@@ -417,7 +422,7 @@ public class Main {
 		return null;
 	}
 
-	void copyPressed() {
+	/*private*/void copyPressed() {
 		boolean wasPaused = paused;
 
 		copyButton.setEnabled(false);
@@ -552,17 +557,17 @@ public class Main {
 		}
 	}
 
-	void exitPressed() {
+	/*private*/void exitPressed() {
 		shell.dispose();
 	}
 
-	void handleDispose() {
+	/*private*/void handleDispose() {
 		if (copier != null) {
 			copier.abort();
 		}
 	}
 
-	void pausePressed() {
+	/*private*/void pausePressed() {
 		copier.pause();
 		copyButton.setEnabled(true);
 		exitButton.setEnabled(false);
@@ -731,11 +736,11 @@ public class Main {
 		}
 	}
 
-	void settingsModified() {
+	/*private*/void settingsModified() {
 		updateStatus();
 	}
 
-	void skipPressed() {
+	/*private*/void skipPressed() {
 		if (copier != null) {
 			copier.abort();
 		}
@@ -810,7 +815,7 @@ public class Main {
 		statusLabel.setText(status);
 	}
 
-	void updateUI(Runnable updater) {
+	/*private*/void updateUI(Runnable updater) {
 		if (shell.isDisposed()) {
 			return;
 		}
