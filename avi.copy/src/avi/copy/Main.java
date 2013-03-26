@@ -267,7 +267,7 @@ public class Main {
 		Label label;
 
 		label = new Label(parent, 16384);
-		label.setLayoutData(new GridData(SWT.FILL, SWT.UP, false, false));
+		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		label.setText(text);
 
 		return label;
