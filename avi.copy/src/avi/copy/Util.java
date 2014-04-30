@@ -69,6 +69,7 @@ public final class Util {
 	}
 
 	private static void show(long value) {
-		System.out.format("%,d -> %s\n", Long.valueOf(value), format(value));
+		System.out.format("%,d -> %s / %s\n", //$NON-NLS-1$
+				Long.valueOf(value), format(value), format2(value));
 	}
 }

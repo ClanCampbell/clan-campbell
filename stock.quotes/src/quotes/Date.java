@@ -43,7 +43,7 @@ public final class Date {
 		this.value = value(year, month, day);
 	}
 
-	public Date(java.lang.String yyyymmdd) {
+	public Date(String yyyymmdd) {
 		super();
 
 		Matcher matcher = NumericPattern.matcher(yyyymmdd);
@@ -67,7 +67,7 @@ public final class Date {
 	}
 
 	@Override
-	public java.lang.String toString() {
+	public String toString() {
 		return String.format("%04d/%02d/%02d", // <br/>
 				Integer.valueOf(year()), Integer.valueOf(month() + 1), Integer.valueOf(day()));
 	}

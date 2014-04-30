@@ -18,7 +18,7 @@ public final class HistoryService {
 
 	private static final String UTF_8 = "UTF-8";
 
-	public static quotes.Quote getQuote(String symbol, Date date) {
+	public static Quote getQuote(String symbol, Date date) {
 		try {
 			return getQuote0(symbol, date);
 		} catch (IOException e) {
@@ -26,7 +26,7 @@ public final class HistoryService {
 		}
 	}
 
-	private static quotes.Quote getQuote0(String symbol, Date date) throws IOException {
+	private static Quote getQuote0(String symbol, Date date) throws IOException {
 		URL url = makeQuoteURL(symbol, date);
 		InputStream in = url.openStream();
 		InputStreamReader rd = new InputStreamReader(in, UTF_8);
@@ -58,23 +58,23 @@ public final class HistoryService {
 	}
 
 	private static URL makeQuoteURL(String symbol, Date date) throws IOException {
-		StringBuilder file = new StringBuilder();
+		StringBuilder url = new StringBuilder();
 
-		file.append("/table.csv");
-		file.append("?s=").append(URLEncoder.encode(symbol, UTF_8));
+		url.append("/table.csv");
+		url.append("?s=").append(URLEncoder.encode(symbol, UTF_8));
 
-		file.append("&a=").append(date.month());
-		file.append("&b=").append(date.day());
-		file.append("&c=").append(date.year());
+		url.append("&a=").append(date.month());
+		url.append("&b=").append(date.day());
+		url.append("&c=").append(date.year());
 
-		file.append("&d=").append(date.month());
-		file.append("&e=").append(date.day());
-		file.append("&f=").append(date.year());
+		url.append("&d=").append(date.month());
+		url.append("&e=").append(date.day());
+		url.append("&f=").append(date.year());
 
-		file.append("&g=d");
-		file.append("&ignore=.csv");
+		url.append("&g=d");
+		url.append("&ignore=.csv");
 
-		return new URL("http", Hostname, file.toString());
+		return new URL("http", Hostname, url.toString());
 	}
 
 	private static Pattern quotePattern(Date date) {
