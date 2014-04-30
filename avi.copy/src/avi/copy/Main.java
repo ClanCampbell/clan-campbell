@@ -249,6 +249,12 @@ public class Main {
 
 	private static final Pattern Extensions = Pattern.compile(".*\\.(avi|mkv|mov|mp4|mpg)", Pattern.CASE_INSENSITIVE);
 
+	private static final Pattern Mnemonics = Pattern.compile("&");
+
+	private static String hideMnemonic(String label) {
+		return Mnemonics.matcher(label).replaceAll("&&");
+	}
+
 	public static void main(String[] args) {
 		new Main().run(args);
 	}
@@ -845,7 +851,8 @@ public class Main {
 					dirty = false;
 					updateStatus();
 				} catch (IOException e) {
-					statusLabel.setText("Can't save control file: " + e.getLocalizedMessage());
+					statusLabel.setText("Can't save control file: "
+							+ hideMnemonic(e.getLocalizedMessage()));
 				}
 			}
 
@@ -864,7 +871,7 @@ public class Main {
 				bytesCopied += length;
 			} else if (i == workIndex) {
 				bytesCopied += copier.bytesCopied();
-				statusLabel.setText("Copying " + item);
+				statusLabel.setText("Copying " + hideMnemonic(item.toString()));
 			}
 
 			totalBytes += length;
