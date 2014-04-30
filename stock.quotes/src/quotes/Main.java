@@ -6,7 +6,7 @@ public final class Main {
 
 	private static final java.lang.String[] symbols = { "EGHT", "AMD", "ALU", "AAPL", "APM.V", "RPT.V", "BNS.TO",
 			"BCE.TO", "BRK-B", "BRCM", "CWL.TO", "CM.TO", "FTS.TO", "HSE.TO", "IDG.TO", "IBM",
-			"JML.V", "JDSU", "JDU.TO", "MAS.V", "MSFT", "NA.TO", "NBD.TO", "NRTLQ", "ORCL", "PPL.TO",
+			"JML.V", "JDSU", "MAS.V", "MSFT", "NA.TO", "NBD.TO", "NRTLQ", "ORCL", "PPL.TO",
 			"PWT.TO", "POW.TO", "PG.TO", "RMK.TO", "SXG.V", "SGF.TO", "SGL.TO", "SLF.TO", "SU.TO", "SNCR", "TTWO",
 			"T.TO", "TA.TO", "TRP.TO", "WPK.TO", "WVNTF", "WSP.TO", "^DJI", "^IXIC", "^GSPC", "^GSPTSE", "XIC.TO", "XIU.TO" };
 
