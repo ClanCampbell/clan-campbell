@@ -4,81 +4,117 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Map;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * @author Keith
  */
-public class Main {
+public final class Main {
 
 	public static void main(String[] args) {
 		if (args.length == 0) {
-			System.out.println("Usage: AVITimes.pl {data-file} ...");
+			System.out.println("Usage: AVITimes.pl [-dateFirst] {data-file} ...");
 			return;
 		}
 
-		Main main = new Main();
+		new Main().run(args);
+	}
 
-		for (String dataFile : args) {
+	private boolean dateFirst;
+
+	private final SortedMap<String, Long> times;
+
+	private Main() {
+		super();
+		this.dateFirst = false;
+		this.times = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+	}
+
+	private Long getTime(String title) {
+		Long time = null;
+
+		if (title != null && (time = times.get(title)) == null) {
+			// no exact match, check if a prefix of the title is in the map
+			SortedMap<String, Long> headMap = times.headMap(title);
+			String head;
+
+			if (!headMap.isEmpty() && title.startsWith((head = headMap.lastKey()))) {
+				time = times.get(head);
+			}
+		}
+
+		return time;
+	}
+
+	private void readTimes(String dataFile) throws IOException {
+		String lineRegex;
+		int dateGroup;
+		int titleGroup;
+
+		if (dateFirst) {
+			lineRegex = "^\\s*(\\d{12})\\s+(\\S.*)$";
+			dateGroup = 1;
+			titleGroup = 2;
+		} else {
+			lineRegex = "^\\s*(\\d+)\\s+(\\d{12})\\s*$";
+			dateGroup = 2;
+			titleGroup = 1;
+		}
+
+		Pattern linePattern = Pattern.compile(lineRegex);
+		DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmm");
+
+		try (BufferedReader data = new BufferedReader(new FileReader(dataFile))) {
+			String line;
+
+			while ((line = data.readLine()) != null) {
+				Matcher matcher = linePattern.matcher(line);
+
+				if (!matcher.matches()) {
+					continue;
+				}
+
+				String date = matcher.group(dateGroup);
+				String title = matcher.group(titleGroup);
+
+				try {
+					times.put(title, Long.valueOf(dateFormat.parse(date).getTime()));
+				} catch (ParseException e) {
+					// cannot happen because it matches the date group of linePattern
+				}
+			}
+		}
+	}
+
+	private void run(String[] args) {
+		for (String arg : args) {
+			if ("-dateFirst".equals(arg)) {
+				dateFirst = true;
+				continue;
+			}
+
 			try {
-				main.readTimes(dataFile);
+				readTimes(arg);
 			} catch (IOException e) {
 				e.printStackTrace();
 				return;
 			}
 		}
 
-		main.updateFileTimes();
-	}
-
-	private final Map<String, Long> times;
-
-	public Main() {
-		super();
-		this.times = new HashMap<>();
-	}
-
-	private void readTimes(String dataFile) throws IOException {
-		BufferedReader data = new BufferedReader(new FileReader(dataFile));
-		String timeRegex = "^\\s*(\\d+)\\s+(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)\\s*$";
-		Pattern timePattern = Pattern.compile(timeRegex);
-
-		try {
-			String line;
-
-			while ((line = data.readLine()) != null) {
-				Matcher matcher = timePattern.matcher(line);
-
-				if (!matcher.matches()) {
-					continue;
-				}
-
-				String episode = matcher.group(1);
-				int year = Integer.parseInt(matcher.group(2));
-				int month = Integer.parseInt(matcher.group(3)) - 1;
-				int date = Integer.parseInt(matcher.group(4));
-				int hour = Integer.parseInt(matcher.group(5));
-				int minute = Integer.parseInt(matcher.group(6));
-				GregorianCalendar cal = new GregorianCalendar(year, month,
-						date, hour, minute);
-
-				times.put(episode, Long.valueOf(cal.getTimeInMillis()));
-			}
-		} finally {
-			data.close();
-		}
+		updateFileTimes();
 	}
 
 	private void updateFileTimes() {
-		File dir = new File(".");
-		String nameRegex = "^(\\d+).*\\.(avi|mkv|mov|mp4|mpg)$";
+		String nameRegex = "^.+\\.(avi|mkv|mov|mp4|mpg)$";
 		Pattern namePattern = Pattern.compile(nameRegex);
 
-		for (File file : dir.listFiles()) {
+		for (File file : new File(".").listFiles()) {
 			String name = file.getName();
 			Matcher matcher = namePattern.matcher(name);
 
@@ -86,20 +122,21 @@ public class Main {
 				continue;
 			}
 
-			Long time = times.get(matcher.group(1));
+			Long time = getTime(name);
 
 			if (time == null) {
-				System.out.format("Warning: no time specified for %s\n", name);
+				System.out.format("Warning: no time specified for '%s'\n", name);
 				continue;
 			}
 
 			long timeInMillis = time.longValue();
 			long modified = file.lastModified();
 
-			if (modified == timeInMillis || file.setLastModified(timeInMillis))
+			if (modified == timeInMillis || file.setLastModified(timeInMillis)) {
 				continue;
+			}
 
-			System.out.format("Warning: failed to update time for %s\n", name);
+			System.out.format("Warning: failed to update time for '%s'\n", name);
 		}
 	}
 }
