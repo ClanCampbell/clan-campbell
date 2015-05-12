@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="build-jar" name="Create runnable jar for project avi.times">
+	<target name="build-jar">
+		<jar destfile="AVITimes.jar" filesetmanifest="mergewithoutmain">
+			<manifest>
+				<attribute name="Class-Path" value="." />
+				<attribute name="Main-Class" value="avi.times.Main" />
+			</manifest>
+			<fileset dir="bin" />
+		</jar>
+	</target>
+</project>
