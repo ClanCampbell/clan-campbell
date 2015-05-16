@@ -31,7 +31,7 @@ public final class Util {
 	}
 
 	private static String format2(long amount) {
-		BigDecimal v = new BigDecimal(amount >>> 1).multiply(new BigDecimal(2));
+		BigDecimal v = new BigDecimal(amount >>> 1).multiply(BigDecimal.valueOf(2));
 
 		if ((amount & 1) != 0) {
 			v = v.add(BigDecimal.ONE);
