@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -80,11 +82,17 @@ public final class Main {
 					continue;
 				}
 
-				String date = matcher.group(dateGroup);
-				String title = matcher.group(titleGroup);
-
 				try {
-					times.put(title, Long.valueOf(dateFormat.parse(date).getTime()));
+					String title = matcher.group(titleGroup);
+					Date date = dateFormat.parse(matcher.group(dateGroup));
+					Calendar time = new Calendar.Builder().setInstant(date).build();
+
+					if (time.get(Calendar.YEAR) < 1970) {
+						System.out.println("Clamping timestamp to 1970 for " + title);
+						time.set(Calendar.YEAR, 1970);
+					}
+
+					times.put(title, Long.valueOf(time.getTimeInMillis()));
 				} catch (ParseException e) {
 					// cannot happen because it matches the date group of linePattern
 				}
