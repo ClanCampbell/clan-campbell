@@ -28,6 +28,10 @@ public final class Main {
 		new Main().run(args);
 	}
 
+	private static boolean startsWithIgnoreCase(String string, String prefix) {
+		return string.regionMatches(true, 0, prefix, 0, prefix.length());
+	}
+
 	private boolean dateFirst;
 
 	private final SortedMap<String, Long> times;
@@ -46,7 +50,7 @@ public final class Main {
 			SortedMap<String, Long> headMap = times.headMap(title);
 			String head;
 
-			if (!headMap.isEmpty() && title.startsWith((head = headMap.lastKey()))) {
+			if (!headMap.isEmpty() && startsWithIgnoreCase(title, head = headMap.lastKey())) {
 				time = times.get(head);
 			}
 		}
