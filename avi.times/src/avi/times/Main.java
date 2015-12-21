@@ -19,6 +19,10 @@ import java.util.regex.Pattern;
  */
 public final class Main {
 
+	private static final Pattern DateAndTitle = Pattern.compile("^\\s*(\\d{12})\\s+(\\S.*)$");
+
+	private static final Pattern EpisodeAndDate = Pattern.compile("^\\s*(\\d+)\\s+(\\d{12})\\s*$");
+
 	public static void main(String[] args) {
 		if (args.length == 0) {
 			System.out.println("Usage: AVITimes.pl [-dateFirst] {data-file} ...");
@@ -32,13 +36,10 @@ public final class Main {
 		return string.regionMatches(true, 0, prefix, 0, prefix.length());
 	}
 
-	private boolean dateFirst;
-
 	private final SortedMap<String, Long> times;
 
 	private Main() {
 		super();
-		this.dateFirst = false;
 		this.times = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 	}
 
@@ -59,36 +60,28 @@ public final class Main {
 	}
 
 	private void readTimes(String dataFile) throws IOException {
-		String lineRegex;
-		int dateGroup;
-		int titleGroup;
-
-		if (dateFirst) {
-			lineRegex = "^\\s*(\\d{12})\\s+(\\S.*)$";
-			dateGroup = 1;
-			titleGroup = 2;
-		} else {
-			lineRegex = "^\\s*(\\d+)\\s+(\\d{12})\\s*$";
-			dateGroup = 2;
-			titleGroup = 1;
-		}
-
-		Pattern linePattern = Pattern.compile(lineRegex);
 		DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmm");
 
 		try (BufferedReader data = new BufferedReader(new FileReader(dataFile))) {
 			String line;
 
 			while ((line = data.readLine()) != null) {
-				Matcher matcher = linePattern.matcher(line);
+				Matcher matcher;
+				String dateText;
+				String title;
 
-				if (!matcher.matches()) {
+				if ((matcher = DateAndTitle.matcher(line)).matches()) {
+					dateText = matcher.group(1);
+					title = matcher.group(2);
+				} else if ((matcher = EpisodeAndDate.matcher(line)).matches()) {
+					dateText = matcher.group(2);
+					title = matcher.group(1);
+				} else {
 					continue;
 				}
 
 				try {
-					String title = matcher.group(titleGroup);
-					Date date = dateFormat.parse(matcher.group(dateGroup));
+					Date date = dateFormat.parse(dateText);
 					Calendar time = new Calendar.Builder().setInstant(date).build();
 
 					if (time.get(Calendar.YEAR) < 1970) {
@@ -98,7 +91,7 @@ public final class Main {
 
 					times.put(title, Long.valueOf(time.getTimeInMillis()));
 				} catch (ParseException e) {
-					// cannot happen because it matches the date group of linePattern
+					// cannot happen because the pattern matched
 				}
 			}
 		}
@@ -106,11 +99,6 @@ public final class Main {
 
 	private void run(String[] args) {
 		for (String arg : args) {
-			if ("-dateFirst".equals(arg)) {
-				dateFirst = true;
-				continue;
-			}
-
 			try {
 				readTimes(arg);
 			} catch (IOException e) {
